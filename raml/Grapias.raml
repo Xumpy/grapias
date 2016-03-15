@@ -1,0 +1,84 @@
+#%RAML 0.8
+title: GRAPIAS (Global RAspberry PI Application Service)
+baseUri: http://localhost:8080/grapias
+version: 1.0
+mediaType: application/json
+
+schemas:
+  - menuitem: |
+      {
+        "title": "GRAPIAS Schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Internal ID of Menu Item",
+            "type": "integer",
+            "minimum": 1
+          },
+          "description": {
+            "description": "Description of what to show in menu item",
+            "type": "string"
+          },
+          "url": {
+            "description": "Address of the server where this RAML is available",
+            "type": "string"
+          }
+        },
+        "required": ["id", "description", "url"]
+      }
+
+/enter:
+  post:
+    body:
+      application/json:
+        schema: menuitem
+        example: |
+          {
+            "id":1,
+            "description":"Main Menu",
+            "url":"http://localhost:8080/grapias"
+          }
+    responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {
+                  "menuItems": [
+                    {
+                      "id":2,
+                      "description":"Hello World",
+                      "url":"http://localhost:8080/grapias"
+                    },
+                    {
+                      "id":3,
+                      "description":"Hello Nico",
+                      "url":"http://localhost:8080/grapias"
+                    }
+                  ]
+                }
+/back:
+  post:
+    body:
+      application/json:
+        schema: menuitem
+        example: |
+          {
+            "id":3,
+            "description":"Hello Nico",
+            "url":"http://localhost:8080/grapias"
+          }
+    responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {
+                  "menuItems": [
+                    {
+                      "id":1,
+                      "description":"Main Menu",
+                      "url":"http://localhost:8080/grapias"
+                    }
+                  ]
+                }
