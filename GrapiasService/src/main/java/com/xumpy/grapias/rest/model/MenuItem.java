@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  *
  * @author nico
  */
-public class MenuItem {
+public class MenuItem implements Comparable{
     private Integer id;
     private String description;
     private String url;
@@ -63,5 +63,11 @@ public class MenuItem {
             append(description).
             append(url).
             toHashCode();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        MenuItem compareMenuItem = (MenuItem) o;
+        return this.id > compareMenuItem.getId() ? 1 : 0;
     }
 }

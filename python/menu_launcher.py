@@ -28,9 +28,10 @@ def runmenu(oldmenu, menu):
 
         if x==ord('b'):
           pos=0
-          oldpos=None 
           screen.clear()
+          oldmenu = menu[oldpos]
           menu = call_rest_back(oldmenu)
+          oldpos=None 
           optioncount = len(menu)
 
         if pos != oldpos:

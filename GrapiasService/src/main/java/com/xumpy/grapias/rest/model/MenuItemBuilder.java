@@ -7,39 +7,62 @@ package com.xumpy.grapias.rest.model;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.SortedSetMultimap;
+import com.xumpy.grapias.exceptions.MenuItemNotFoundException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Map.Entry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MenuItemBuilder {
-    private static ListMultimap<Integer, MenuItem> allMenuItems;
+    @Autowired
+    private SortedSetMultimap<Integer, MenuItem> allMenuItems;
     
-    public static void build(MenuItem menuItem){
-        if (allMenuItems == null){
+    private String url;
+    
+    public void build(MenuItem menuItem, File csvFile){
+        if (allMenuItems.size() == 0){
+            allMenuItems.put(0, menuItem);
             
-            allMenuItems = ArrayListMultimap.create();
-            allMenuItems.put(menuItem.getId(), menuItem);
-            
-            allMenuItems.putAll(buildCSV("menu.csv"));
+            allMenuItems.putAll(buildCSV(csvFile));
         }
     }
     
-    public static ListMultimap<Integer, MenuItem> buildCSV(String menuCSV){
-    	File file = new File(MenuItemBuilder.class.getClass().getResource(menuCSV).getFile());
-        
-        String line;
+    public MenuItem getMenuItem(Integer menuId) throws MenuItemNotFoundException{
+        for(Entry<Integer, MenuItem> entry: allMenuItems.entries()){
+            if(entry.getValue().getId().equals(menuId)){
+                return entry.getValue();
+            }
+        }
+        throw new MenuItemNotFoundException();
+    }
+    
+    public MenuItem previousMenuItem(MenuItem menuItem) throws MenuItemNotFoundException{
+        for(Entry<Integer, MenuItem> entry: allMenuItems.entries()){
+            if(entry.getValue().getId().equals(menuItem.getId())){
+                return getMenuItem(entry.getKey());
+            }
+        }
+        throw new MenuItemNotFoundException();
+    }
+    
+    public ListMultimap<Integer, MenuItem> buildCSV(File menuCsv){
+    	String line;
         String cvsSplitBy = ",";
         ListMultimap<Integer, MenuItem> csvMenuItems = ArrayListMultimap.create();
         
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            BufferedReader br = new BufferedReader(new FileReader(menuCsv));
             while ((line = br.readLine()) != null) {
                     String[] csvMenuInfo = line.split(cvsSplitBy);
                     MenuItem menuItem = new MenuItem();
                     menuItem.setId(Integer.parseInt(csvMenuInfo[0]));
                     menuItem.setDescription(csvMenuInfo[2]);
-                    menuItem.setUrl("http://localhost:8080/grapias");
+                    menuItem.setUrl(url);
                     
                     csvMenuItems.put(Integer.parseInt(csvMenuInfo[1]), menuItem);
             }
@@ -50,7 +73,25 @@ public class MenuItemBuilder {
         return csvMenuItems;
     }
     
-    public static MenuItems enter(MenuItem menuItem){
+    public MenuItems enter(MenuItem menuItem) throws MenuItemNotFoundException{
+        MenuItems menuItems = new MenuItems();
+        menuItems.setMenuItems(allMenuItems.get(menuItem.getId()));
         
+        if(menuItems.getMenuItems().size() == 0){
+            return enter(previousMenuItem(menuItem));
+        }
+        
+        return menuItems;
+    }
+    
+    public MenuItems back(MenuItem menuItem) throws MenuItemNotFoundException{
+        try{
+            return enter(previousMenuItem(previousMenuItem(menuItem)));
+        } catch(MenuItemNotFoundException ex){}
+        return enter(getMenuItem(1));
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

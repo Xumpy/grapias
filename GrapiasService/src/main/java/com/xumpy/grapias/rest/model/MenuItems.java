@@ -5,20 +5,20 @@
  */
 package com.xumpy.grapias.rest.model;
 
-import java.util.List;
+import java.util.SortedSet;
 
 /**
  *
  * @author nico
  */
 public class MenuItems {
-    private List<MenuItem> menuItems;
+    private SortedSet<MenuItem> menuItems;
 
-    public List<MenuItem> getMenuItems() {
+    public SortedSet<MenuItem> getMenuItems() {
         return menuItems;
     }
 
-    public void setMenuItems(List<MenuItem> menuItems) {
+    public void setMenuItems(SortedSet<MenuItem> menuItems) {
         this.menuItems = menuItems;
     }
 }
